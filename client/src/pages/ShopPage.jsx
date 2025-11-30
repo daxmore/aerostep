@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
@@ -22,11 +22,7 @@ const ShopPage = () => {
     });
   }, [searchParams]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [filters]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -41,7 +37,11 @@ const ShopPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
@@ -112,13 +112,13 @@ const ShopPage = () => {
               <div className="mb-10">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Category</h3>
                 <div className="space-y-3">
-                  {['All', 'Men', 'Women'].map((cat) => (
+                  {['All', 'Running', 'Training', 'Casual', 'Basketball', 'Football'].map((cat) => (
                     <button
                       key={cat}
                       onClick={() => handleFilterChange('category', cat === 'All' ? '' : cat)}
                       className={`block w-full text-left text-sm font-bold transition-all duration-200 ${(filters.category === cat) || (cat === 'All' && !filters.category)
-                        ? 'text-[#0F1720] translate-x-2'
-                        : 'text-gray-400 hover:text-[#0F1720] hover:translate-x-1'
+                        ? 'text-blue-600 translate-x-2'
+                        : 'text-gray-500 hover:text-blue-600 hover:translate-x-1'
                         }`}
                     >
                       {cat}
@@ -136,8 +136,8 @@ const ShopPage = () => {
                       key={tag}
                       onClick={() => handleFilterChange('tag', filters.tag === tag ? '' : tag)}
                       className={`block w-full text-left text-sm font-bold transition-all duration-200 ${filters.tag === tag
-                        ? 'text-[#0F1720] translate-x-2'
-                        : 'text-gray-400 hover:text-[#0F1720] hover:translate-x-1'
+                        ? 'text-blue-600 translate-x-2'
+                        : 'text-gray-500 hover:text-blue-600 hover:translate-x-1'
                         }`}
                     >
                       {tag}

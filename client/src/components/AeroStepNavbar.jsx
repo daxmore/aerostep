@@ -26,17 +26,20 @@ const AeroStepNavbar = () => {
                         <Link to="/shop" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
                             Shop
                         </Link>
-                        <Link to="/shop?category=Men" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
-                            Men
-                        </Link>
-                        <Link to="/shop?category=Women" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
-                            Women
-                        </Link>
-                        <Link to="/shop?tag=Running" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
+                        <Link to="/shop?category=Running" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
                             Running
                         </Link>
-                        <Link to="/shop?tag=Training" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
+                        <Link to="/shop?category=Training" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
                             Training
+                        </Link>
+                        <Link to="/shop?category=Casual" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
+                            Casual
+                        </Link>
+                        <Link to="/shop?category=Basketball" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
+                            Basketball
+                        </Link>
+                        <Link to="/shop?category=Football" className="text-[#0F1720] font-medium hover:text-[#0057FF] transition-colors">
+                            Football
                         </Link>
                     </div>
 

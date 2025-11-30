@@ -35,13 +35,13 @@ const OrdersPage = () => {
 
     const getStatusColor = (status) => {
         const colors = {
-            'Pending': 'bg-yellow-900/30 text-yellow-400 border-yellow-800',
-            'Processing': 'bg-blue-900/30 text-blue-400 border-blue-800',
-            'Shipped': 'bg-purple-900/30 text-purple-400 border-purple-800',
-            'Delivered': 'bg-green-900/30 text-green-400 border-green-800',
-            'Cancelled': 'bg-red-900/30 text-red-400 border-red-800',
+            'Pending': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+            'Processing': 'bg-blue-50 text-blue-700 border border-blue-200',
+            'Shipped': 'bg-purple-50 text-purple-700 border border-purple-200',
+            'Delivered': 'bg-green-50 text-green-700 border border-green-200',
+            'Cancelled': 'bg-red-50 text-red-700 border border-red-200',
         };
-        return colors[status] || 'bg-gray-900/30 text-gray-400 border-gray-800';
+        return colors[status] || 'bg-gray-50 text-gray-600 border border-gray-200';
     };
 
     // Pagination logic
@@ -55,16 +55,16 @@ const OrdersPage = () => {
     };
 
     if (loading) {
-        return <div className="text-gray-400">Loading orders...</div>;
+        return <div className="text-gray-500 font-body">Loading orders...</div>;
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 font-body">
             {/* Header with Filter */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Orders</h1>
-                    <p className="text-gray-400">Manage customer orders ({orders.length} total)</p>
+                    <h1 className="text-3xl font-bold text-aero-text mb-2 font-heading">Orders</h1>
+                    <p className="text-gray-500">Manage customer orders ({orders.length} total)</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <select
@@ -73,21 +73,21 @@ const OrdersPage = () => {
                             setItemsPerPage(Number(e.target.value));
                             setCurrentPage(1);
                         }}
-                        className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-4 py-2 bg-aero-surface border border-gray-200 rounded-lg text-aero-text focus:outline-none focus:ring-2 focus:ring-aero-primary transition-all shadow-sm"
                     >
                         <option value={10}>10 per page</option>
                         <option value={25}>25 per page</option>
                         <option value={50}>50 per page</option>
                     </select>
                     <div className="flex items-center gap-2">
-                        <span className="text-gray-400">Filter:</span>
+                        <span className="text-gray-500">Filter:</span>
                         <select
                             value={filterStatus}
                             onChange={(e) => {
                                 setFilterStatus(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-4 py-2 bg-aero-surface border border-gray-200 rounded-lg text-aero-text focus:outline-none focus:ring-2 focus:ring-aero-primary transition-all shadow-sm"
                         >
                             <option value="All">All Orders</option>
                             <option value="Pending">Pending</option>
@@ -101,42 +101,56 @@ const OrdersPage = () => {
             </div>
 
             {/* Orders Table */}
-            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <div className="bg-aero-surface rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-700/50">
+                        <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Order ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Customer</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Total</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-700">
+                        <tbody className="divide-y divide-gray-100">
                             {currentOrders.length > 0 ? (
                                 currentOrders.map((order) => (
-                                    <tr
-                                        key={order._id}
-                                        onClick={() => navigate(`/admin/orders/${order._id}`)}
-                                        className="hover:bg-gray-700/30 transition-colors cursor-pointer"
-                                    >
-                                        <td className="px-6 py-4 text-white font-mono text-sm">#{order._id.slice(-8)}</td>
-                                        <td className="px-6 py-4 text-gray-300">{order.userId?.name || 'N/A'}</td>
-                                        <td className="px-6 py-4 text-gray-300">
+                                    <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                                            #{order._id.slice(-6)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col">
+                                                <span className="text-aero-text font-medium">{order.userId?.name || 'Unknown User'}</span>
+                                                <span className="text-xs text-gray-500">{order.userId?.email || 'No Email'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {new Date(order.createdAt).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-4 text-white font-medium">₹{order.totalPrice?.toFixed(2)}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getStatusColor(order.status)}`}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-aero-text font-bold">
+                                            ₹{order.totalPrice.toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
                                                 {order.status}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button
+                                                onClick={() => navigate(`/admin/orders/${order._id}`)}
+                                                className="text-aero-primary hover:text-blue-700 transition-colors"
+                                            >
+                                                View Details
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                                         No orders found
                                     </td>
                                 </tr>
@@ -148,48 +162,34 @@ const OrdersPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">
+                <div className="flex items-center justify-between pt-4">
+                    <p className="text-sm text-gray-500">
                         Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, orders.length)} of {orders.length} orders
                     </p>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 bg-aero-surface hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 border border-gray-200"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
-
-                        {[...Array(totalPages)].map((_, index) => {
-                            const pageNumber = index + 1;
-                            if (
-                                pageNumber === 1 ||
-                                pageNumber === totalPages ||
-                                (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                            ) {
-                                return (
-                                    <button
-                                        key={pageNumber}
-                                        onClick={() => handlePageChange(pageNumber)}
-                                        className={`px-4 py-2 rounded-lg transition-colors ${currentPage === pageNumber
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-                                            }`}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                );
-                            } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
-                                return <span key={pageNumber} className="text-gray-500">...</span>;
-                            }
-                            return null;
-                        })}
-
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                            <button
+                                key={pageNumber}
+                                onClick={() => handlePageChange(pageNumber)}
+                                className={`px-4 py-2 rounded-lg transition-all duration-200 ${currentPage === pageNumber
+                                    ? 'bg-aero-primary text-white shadow-lg shadow-blue-500/20'
+                                    : 'bg-aero-surface hover:bg-gray-100 text-gray-600 border border-gray-200'
+                                    }`}
+                            >
+                                {pageNumber}
+                            </button>
+                        ))}
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 bg-aero-surface hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 border border-gray-200"
                         >
                             <ChevronRight className="w-5 h-5" />
                         </button>

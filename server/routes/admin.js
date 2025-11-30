@@ -63,12 +63,24 @@ router.post('/products', adminAuth, async (req, res) => {
         }
     }
 
+    // Validate Images
+    if (!images || !images.primary) {
+        return res.status(400).json({ msg: 'Primary image is required' });
+    }
+
+    // Default thumbnail to primary image if not provided
+    const productImages = {
+        primary: images.primary,
+        thumbnail: images.thumbnail || images.primary,
+        gallery: images.gallery || []
+    };
+
     try {
         const product = new Product({
             title,
             description,
             price: Number(price),
-            images,
+            images: productImages,
             sizes,
             category,
             tags: tags || [],

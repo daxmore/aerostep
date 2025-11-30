@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AuthLayout from '../components/AuthLayout';
+import Modal from '../components/Modal';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const LoginPage = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [banMessage, setBanMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -36,7 +39,12 @@ const LoginPage = () => {
       // TODO: Store auth state
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      if (err.response?.status === 403) {
+        setBanMessage(err.response.data.msg || 'Your account has been banned.');
+        setShowBanModal(true);
+      } else {
+        setError(err.response?.data?.message || 'Login failed');
+      }
     }
   };
 
@@ -157,6 +165,15 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Ban Modal */}
+      <Modal
+        isOpen={showBanModal}
+        onClose={() => setShowBanModal(false)}
+        title="Account Suspended"
+        message={banMessage}
+        type="danger"
+      />
     </AuthLayout>
   );
 };

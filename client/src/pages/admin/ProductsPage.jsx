@@ -62,20 +62,20 @@ const ProductsPage = () => {
     };
 
     if (loading) {
-        return <div className="text-gray-400">Loading products...</div>;
+        return <div className="text-gray-500">Loading products...</div>;
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 font-body">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Products</h1>
-                    <p className="text-gray-400">Manage your product catalog ({filteredProducts.length} total)</p>
+                    <h1 className="text-3xl font-bold text-aero-text mb-2 font-heading">Products</h1>
+                    <p className="text-gray-500">Manage your product catalog ({filteredProducts.length} total)</p>
                 </div>
                 <Link
                     to="/admin/products/new"
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border border-blue-500 hover:border-blue-700 text-blue-500 hover:text-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-500/20"
                 >
                     <Plus className="w-5 h-5" />
                     Add Product
@@ -94,7 +94,7 @@ const ProductsPage = () => {
                             setSearchTerm(e.target.value);
                             setCurrentPage(1); // Reset to first page on search
                         }}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-11 pr-4 py-3 bg-aero-surface border border-gray-200 rounded-lg text-aero-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-aero-primary transition-all shadow-sm"
                     />
                 </div>
                 <select
@@ -103,7 +103,7 @@ const ProductsPage = () => {
                         setItemsPerPage(Number(e.target.value));
                         setCurrentPage(1);
                     }}
-                    className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-3 bg-aero-surface border border-gray-200 rounded-lg text-aero-text focus:outline-none focus:ring-2 focus:ring-aero-primary transition-all shadow-sm"
                 >
                     <option value={10}>10 per page</option>
                     <option value={25}>25 per page</option>
@@ -113,37 +113,37 @@ const ProductsPage = () => {
             </div>
 
             {/* Products Table */}
-            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <div className="bg-aero-surface rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-700/50">
+                        <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Image</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Price</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Category</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Stock</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-700">
+                        <tbody className="divide-y divide-gray-100">
                             {currentProducts.length > 0 ? (
                                 currentProducts.map((product) => {
                                     const totalStock = product.sizes?.reduce((sum, size) => sum + size.stock, 0) || 0;
                                     return (
-                                        <tr key={product._id} className="hover:bg-gray-700/30 transition-colors">
+                                        <tr key={product._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <img
                                                     src={product.images?.primary || product.images?.thumbnail}
                                                     alt={product.title}
-                                                    className="w-12 h-12 object-cover rounded"
+                                                    className="w-12 h-12 object-cover rounded bg-gray-200"
                                                 />
                                             </td>
-                                            <td className="px-6 py-4 text-white font-medium">{product.title}</td>
-                                            <td className="px-6 py-4 text-gray-300">₹{product.price.toLocaleString()}</td>
-                                            <td className="px-6 py-4 text-gray-300">{product.category}</td>
+                                            <td className="px-6 py-4 text-aero-text font-medium">{product.title}</td>
+                                            <td className="px-6 py-4 text-gray-600">₹{product.price.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-gray-600">{product.category}</td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded text-xs ${totalStock < 10 ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300'
+                                                <span className={`px-2 py-1 rounded text-xs ${totalStock < 10 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'
                                                     }`}>
                                                     {totalStock} units
                                                 </span>
@@ -152,14 +152,14 @@ const ProductsPage = () => {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <Link
                                                         to={`/admin/products/${product._id}/edit`}
-                                                        className="p-2 hover:bg-blue-600 rounded transition-colors"
+                                                        className="p-2 hover:bg-blue-50 text-blue-600 rounded transition-colors"
                                                         title="Edit"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </Link>
                                                     <button
                                                         onClick={() => handleDelete(product._id)}
-                                                        className="p-2 hover:bg-red-600 rounded transition-colors"
+                                                        className="p-2 hover:bg-red-50 text-red-600 rounded transition-colors"
                                                         title="Delete"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -171,7 +171,7 @@ const ProductsPage = () => {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                                         No products found
                                     </td>
                                 </tr>
@@ -184,14 +184,14 @@ const ProductsPage = () => {
             {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-500">
                         Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length} products
                     </p>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 bg-aero-surface hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 border border-gray-200"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
@@ -209,8 +209,8 @@ const ProductsPage = () => {
                                         key={pageNumber}
                                         onClick={() => handlePageChange(pageNumber)}
                                         className={`px-4 py-2 rounded-lg transition-colors ${currentPage === pageNumber
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                                            ? 'bg-aero-primary text-white shadow-lg shadow-blue-500/20'
+                                            : 'bg-aero-surface hover:bg-gray-100 text-gray-600 border border-gray-200'
                                             }`}
                                     >
                                         {pageNumber}
@@ -225,7 +225,7 @@ const ProductsPage = () => {
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 bg-aero-surface hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 border border-gray-200"
                         >
                             <ChevronRight className="w-5 h-5" />
                         </button>

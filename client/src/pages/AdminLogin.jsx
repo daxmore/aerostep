@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import Modal from '../components/Modal';
 
 const AdminLogin = () => {
     const navigate = useNavigate();
@@ -10,6 +11,8 @@ const AdminLogin = () => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showBanModal, setShowBanModal] = useState(false);
+    const [banMessage, setBanMessage] = useState('');
 
     const handleChange = (e) => {
         setFormData({
@@ -59,8 +62,13 @@ const AdminLogin = () => {
                 console.log('Navigating to /admin/dashboard');
                 navigate('/admin/dashboard');
             } else {
-                console.log('Login failed:', data.msg);
-                setError(data.msg || 'Login failed');
+                if (response.status === 403) {
+                    setBanMessage(data.msg || 'Your account has been banned.');
+                    setShowBanModal(true);
+                } else {
+                    console.log('Login failed:', data.msg);
+                    setError(data.msg || 'Login failed');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -150,6 +158,15 @@ const AdminLogin = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Ban Modal */}
+            <Modal
+                isOpen={showBanModal}
+                onClose={() => setShowBanModal(false)}
+                title="Account Suspended"
+                message={banMessage}
+                type="danger"
+            />
         </div>
     );
 };
