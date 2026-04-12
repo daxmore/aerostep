@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
 
   const [state, dispatch] = useReducer(authReducer, initialState);
   const [cartItems, setCartItems] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
 
   // Configure axios to send cookies with requests
   axios.defaults.withCredentials = true;
@@ -51,7 +52,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await axios.get('/api/users');
       dispatch({ type: 'USER_LOADED', payload: res.data });
-    } catch (err) {
+      if (res.data.wishlist) {
+        setWishlist(res.data.wishlist);
+      }
+    } catch (_err) {
       dispatch({ type: 'AUTH_ERROR' });
     }
   };
@@ -65,6 +69,49 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getWishlist = async () => {
+    try {
+      const { data } = await axios.get('/api/users/wishlist');
+      setWishlist(data);
+    } catch (err) {
+      console.error('Error fetching wishlist:', err);
+    }
+  };
+
+  const removeFromWishlist = async (productId) => {
+    try {
+      const { data } = await axios.delete(`/api/users/wishlist/${productId}`);
+      setWishlist(data);
+    } catch (err) {
+      console.error('Error removing from wishlist:', err);
+    }
+  };
+
+  const toggleWishlist = async (productId) => {
+    if (!state.isAuthenticated) return;
+    try {
+      const isAlreadyInWishlist = wishlist.some(p => p._id === productId);
+      if (isAlreadyInWishlist) {
+        await removeFromWishlist(productId);
+      } else {
+        const { data } = await axios.post(`/api/users/wishlist/${productId}`);
+        setWishlist(data);
+      }
+    } catch (err) {
+      console.error('Error toggling wishlist:', err);
+    }
+  };
+
+  const addToCart = async (productId, size, quantity = 1) => {
+    if (!state.isAuthenticated) return;
+    try {
+        await axios.post('/api/cart', { productId, size, quantity });
+        fetchCart();
+    } catch (err) {
+        console.error('Error adding to cart:', err);
+    }
+  };
+
   useEffect(() => {
     loadUser();
   }, []);
@@ -72,6 +119,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (state.isAuthenticated) {
       fetchCart();
+      getWishlist();
     }
   }, [state.isAuthenticated]);
 
@@ -80,7 +128,7 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post('/api/users/register', formData);
       dispatch({ type: 'REGISTER_SUCCESS', payload: res.data });
       loadUser();
-    } catch (err) {
+    } catch (_err) {
       dispatch({ type: 'REGISTER_FAIL' });
     }
   };
@@ -102,13 +150,27 @@ export const AuthProvider = ({ children }) => {
     try {
       await axios.post('/api/users/logout'); // Assuming a logout endpoint on backend
       dispatch({ type: 'LOGOUT' });
+      setCartItems([]);
+      setWishlist([]);
     } catch (err) {
       console.error('Logout failed:', err.response ? err.response.data : err.message);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, register, login, logout, cartItems, fetchCart }}>
+    <AuthContext.Provider value={{ 
+        ...state, 
+        register, 
+        login, 
+        logout, 
+        cartItems, 
+        fetchCart, 
+        wishlist, 
+        getWishlist, 
+        removeFromWishlist, 
+        toggleWishlist,
+        addToCart
+    }}>
       {children}
     </AuthContext.Provider>
   );

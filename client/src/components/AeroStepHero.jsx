@@ -17,7 +17,7 @@ const AeroStepHero = () => {
                         </div>
 
                         {/* Product Name - MASSIVE Typography */}
-                        <h1 className="brand-logo text-[clamp(3.5rem,5vw,8rem)] font-black leading-[0.95] tracking-tight text-[#0F1720]">
+                        <h1 className="text-[clamp(3.5rem,5vw,8rem)] font-black leading-[0.95] tracking-tight text-[#0F1720]">
                             Velocity X
                         </h1>
 

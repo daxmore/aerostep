@@ -73,16 +73,27 @@ const ProductCard = ({ product }) => {
           </button>
 
           {/* Tags - Adjusted Positioning & Styling */}
-          {product.tags && product.tags.length > 0 && (
+          <div className="absolute top-4 left-4 flex flex-col gap-1.5">
+            {product.activeSale && (
+              <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest bg-[#FF3131] text-white rounded-md shadow-lg shadow-red-100 animate-pulse">
+                -{product.activeSale.discountPercentage}% OFF
+              </span>
+            )}
+            {product.tags && product.tags.map((tag, index) => (
+              <span
+                key={index}
+                className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest bg-white/90 backdrop-blur-sm border border-gray-100 text-[#0F1720] rounded-md shadow-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          
+          {!product.tags?.length && product.activeSale && (
             <div className="absolute top-4 left-4 flex flex-col gap-1.5">
-              {product.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest bg-white/90 backdrop-blur-sm border border-gray-100 text-[#0F1720] rounded-md shadow-sm"
-                >
-                  {tag}
+               <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest bg-[#FF3131] text-white rounded-md shadow-lg shadow-red-100 animate-pulse">
+                  -{product.activeSale.discountPercentage}% OFF
                 </span>
-              ))}
             </div>
           )}
         </div>
@@ -104,8 +115,21 @@ const ProductCard = ({ product }) => {
 
           <div className="mt-auto flex items-center justify-between">
             {/* Price */}
-            <div className="text-lg font-black text-[#0F1720]">
-              ₹{product.price?.toLocaleString('en-IN') || '0'}
+            <div className="flex flex-col">
+              {product.salePrice ? (
+                <>
+                  <div className="text-lg font-black text-[#0F1720]">
+                    ₹{product.salePrice.toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs text-gray-400 font-bold line-through">
+                    ₹{product.price?.toLocaleString('en-IN')}
+                  </div>
+                </>
+              ) : (
+                <div className="text-lg font-black text-[#0F1720]">
+                  ₹{product.price?.toLocaleString('en-IN') || '0'}
+                </div>
+              )}
             </div>
 
             {/* Size Count Badge (Subtle) */}

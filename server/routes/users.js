@@ -55,7 +55,7 @@ router.post('/register', async (req, res) => {
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>?]/.test(password);
 
   if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
     return res.status(400).json({ msg: 'Password must contain uppercase, lowercase, number, and special character' });
@@ -80,14 +80,18 @@ router.post('/register', async (req, res) => {
       phone,
     });
 
-    // Store password as plain text
-    user.password = password;
-
+    const { sendWelcomeEmail } = require('../utils/email');
     await user.save();
+    try {
+      await sendWelcomeEmail(user);
+    } catch (_err) {
+      console.error('Failed to send welcome email');
+    }
 
     const payload = {
       user: {
         id: user.id,
+        isAdmin: user.isAdmin || false
       },
     };
 
@@ -127,10 +131,10 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ msg: 'Your account has been banned. Please contact support.' });
     }
 
-    // Compare plain text password
-    const isMatch = password === user.password;
+    // Compare hashed password
+    const isMatch = await user.matchPassword(password);
 
-    console.log('Login attempt:', { email, passwordProvided: password, passwordStored: user.password, isMatch });
+    console.log('Login attempt:', { email, isMatch });
 
     if (!isMatch) {
       console.log('Login failed: Password mismatch');
@@ -140,6 +144,7 @@ router.post('/login', async (req, res) => {
     const payload = {
       user: {
         id: user.id,
+        isAdmin: user.isAdmin || false
       },
     };
 
@@ -207,8 +212,9 @@ router.put('/password', auth, async (req, res) => {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    // Verify old password (plain text comparison)
-    if (user.password !== oldPassword) {
+    // Verify old password (hashed comparison)
+    const isMatch = await user.matchPassword(oldPassword);
+    if (!isMatch) {
       return res.status(400).json({ msg: 'Current password is incorrect' });
     }
 

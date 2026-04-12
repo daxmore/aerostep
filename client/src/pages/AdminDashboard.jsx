@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, ShoppingBag, Users, Package, TrendingUp, Clock, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Users, Package, TrendingUp, Clock, ChevronRight, RotateCcw, Ticket, Send, IndianRupee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -9,9 +9,12 @@ const AdminDashboard = () => {
         totalUsers: 0,
         totalProducts: 0,
         lowStockItems: 0,
+        returnRate: 0,
+        couponSavings: 0,
     });
     const [recentOrders, setRecentOrders] = useState([]);
     const [lowStockProducts, setLowStockProducts] = useState([]);
+    const [triggering, setTriggering] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -38,6 +41,9 @@ const AdminDashboard = () => {
 
             // Calculate stats
             const totalSales = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+            const couponSavings = orders.reduce((sum, order) => sum + (order.discountAmount || 0), 0);
+            const returnedOrders = orders.filter(o => o.returnStatus === 'Approved').length;
+            const returnRate = orders.length > 0 ? (returnedOrders / orders.length) * 100 : 0;
 
             // Get products with stock <= 10
             const lowStock = products.filter(product => {
@@ -51,6 +57,8 @@ const AdminDashboard = () => {
                 totalUsers: users.length,
                 totalProducts: products.length,
                 lowStockItems: lowStock.length,
+                returnRate,
+                couponSavings,
             });
 
             // Get 5 most recent orders
@@ -63,6 +71,22 @@ const AdminDashboard = () => {
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
             setLoading(false);
+        }
+    };
+
+    const handleTriggerEmails = async () => {
+        setTriggering(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/admin/trigger-abandoned-emails', {
+                method: 'POST',
+                credentials: 'include',
+            });
+            const data = await res.json();
+            alert(data.msg);
+        } catch (_err) {
+            alert('Failed to trigger emails');
+        } finally {
+            setTriggering(false);
         }
     };
 
@@ -83,7 +107,7 @@ const AdminDashboard = () => {
                 <div className="bg-aero-surface p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
-                            <DollarSign className="w-6 h-6 text-aero-primary" />
+                            <IndianRupee className="w-6 h-6 text-aero-primary" />
                         </div>
                         <span className="text-green-600 text-sm font-medium flex items-center gap-1">
                             <TrendingUp className="w-3 h-3" /> +12.5%
@@ -133,6 +157,56 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
+            {/* Intelligence Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-[#0F1720] text-white p-6 rounded-2xl shadow-xl flex items-center justify-between col-span-1 md:col-span-2">
+                    <div className="space-y-2">
+                        <h2 className="text-xl font-bold flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-aero-primary" /> Abandoned Cart Recovery
+                        </h2>
+                        <p className="text-gray-400 text-sm">Send automated reminders to customers who left items in their cart for 24h+.</p>
+                        <button 
+                            onClick={handleTriggerEmails}
+                            disabled={triggering}
+                            className={`mt-4 px-6 py-2 rounded-xl font-bold flex items-center gap-2 transition-all ${
+                                triggering ? 'bg-gray-700 cursor-not-allowed' : 'bg-aero-primary hover:bg-blue-600'
+                            }`}
+                        >
+                            <Send className="w-4 h-4" /> {triggering ? 'Sending...' : 'Trigger Recovery Emails'}
+                        </button>
+                    </div>
+                    <div className="hidden lg:block opacity-20"><ShoppingBag className="w-24 h-24" /></div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-gray-500 uppercase tracking-widest text-xs">Return Rate</h3>
+                        <RotateCcw className="w-4 h-4 text-orange-400" />
+                    </div>
+                    <div className="mt-4">
+                        <p className="text-4xl font-black text-[#0F1720]">{stats.returnRate.toFixed(1)}%</p>
+                        <div className="w-full bg-gray-100 h-2 rounded-full mt-4 overflow-hidden">
+                            <div className="bg-orange-400 h-full" style={{ width: `${stats.returnRate}%` }}></div>
+                        </div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-4">Industry average: 15-20%</p>
+                </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="p-4 bg-green-50 rounded-2xl text-green-600"><Ticket className="w-6 h-6" /></div>
+                    <div>
+                        <h3 className="font-bold text-[#0F1720]">Coupon Savings Influence</h3>
+                        <p className="text-sm text-gray-500 font-medium">Total discount applied through promotional codes</p>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <p className="text-2xl font-black text-green-600">₹{stats.couponSavings.toLocaleString()}</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Customer Value Saved</p>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Recent Orders */}
                 <div className="bg-aero-surface rounded-xl border border-gray-200 p-6 shadow-sm">
@@ -145,7 +219,7 @@ const AdminDashboard = () => {
                                         <ShoppingBag className="w-5 h-5 text-aero-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-aero-text font-medium">Order #{order._id.slice(-6)}</p>
+                                        <p className="text-aero-text font-medium">Order #{order._id.slice(-8).toUpperCase()}</p>
                                         <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
                                     </div>
                                 </div>

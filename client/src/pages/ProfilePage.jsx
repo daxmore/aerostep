@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
-import { Package, MapPin, Heart, Settings, LogOut, User, ChevronRight, X } from 'lucide-react';
+import { Package, MapPin, Heart, Settings, LogOut, User, ChevronRight, X, RotateCcw, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Modal from '../components/Modal';
 
@@ -12,6 +12,7 @@ const ProfilePage = () => {
 
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, addressId: null });
   const [cancelModal, setCancelModal] = useState({ isOpen: false, orderId: null });
+  const [returnModal, setReturnModal] = useState({ isOpen: false, orderId: null });
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -50,6 +51,22 @@ const ProfilePage = () => {
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.msg || 'Failed to cancel order');
+    }
+  };
+
+  const handleReturnRequest = async () => {
+    if (!returnModal.orderId) return;
+
+    const reason = prompt('Please provide a reason for the return (optional):');
+
+    try {
+      await axios.patch(`/api/orders/${returnModal.orderId}/return`, { reason });
+      setReturnModal({ isOpen: false, orderId: null });
+      fetchOrders(); // Refresh orders
+      alert('Return request submitted successfully!');
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.msg || 'Failed to request return');
     }
   };
 
@@ -93,17 +110,36 @@ const ProfilePage = () => {
                       </div>
                       <div>
                         <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total</div>
-                        <div className="text-sm font-black text-[#0F1720]">${order.totalPrice}</div>
+                        <div className="text-sm font-black text-[#0F1720]">₹{order.totalPrice}</div>
                       </div>
                       <div>
                         <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Status</div>
                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                            order.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
-                              order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                                'bg-gray-100 text-gray-700'
+                          order.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
+                            order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-700'
                           }`}>
                           {order.status}
                         </span>
+                      </div>
+                      <div className="md:ml-auto">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await axios.get(`http://localhost:5000/api/orders/${order._id}/invoice`, { responseType: 'blob' });
+                              const url = window.URL.createObjectURL(new Blob([res.data]));
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.setAttribute('download', `Invoice-${order._id.slice(-6)}.pdf`);
+                              document.body.appendChild(link);
+                              link.click();
+                            } catch (_e) { alert('Download failed'); }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-[#0F1720] rounded-xl transition-colors text-xs font-bold border border-gray-100"
+                        >
+                          <Download className="w-4 h-4" />
+                          Invoice
+                        </button>
                       </div>
                     </div>
 
@@ -121,6 +157,63 @@ const ProfilePage = () => {
                         </div>
                       ))}
                     </div>
+
+                    {/* Return Status Badges for User */}
+                    {order.returnStatus !== 'None' && (
+                      <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className={`inline-flex items-center justify-center px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit ${
+                            order.returnStatus === 'Requested' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                            order.returnStatus === 'Approved' ? 'bg-green-50 text-green-600 border-green-100' : 
+                            'bg-red-50 text-red-600 border border-red-100'
+                          }`}>
+                            RETURN {order.returnStatus.toUpperCase()}
+                          </span>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                            {order.returnStatus === 'Requested' ? 'Reviewing' :
+                             order.returnStatus === 'Approved' ? 'Success' :
+                             'Declined'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Return Order Button */}
+                    {order.status === 'Delivered' && order.returnStatus === 'None' && (
+                      (() => {
+                        const now = new Date();
+                        const deliveredDate = new Date(order.deliveredAt || order.updatedAt);
+                        const diffTime = Math.abs(now - deliveredDate);
+                        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+                        if (diffDays <= 3) {
+                          return (
+                            <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
+                              <p className="text-xs text-green-600 font-bold">Return window open for 3 days after delivery</p>
+                              <button
+                                onClick={() => setReturnModal({ isOpen: true, orderId: order._id })}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-lg transition-colors text-sm"
+                              >
+                                <RotateCcw className="w-4 h-4" />
+                                Request Return
+                              </button>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()
+                    )}
+
+                    {order.returnStatus !== 'None' && (
+                      <div className="mt-6 pt-6 border-t border-gray-50">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${order.returnStatus === 'Requested' ? 'bg-orange-100 text-orange-700' :
+                          order.returnStatus === 'Approved' ? 'bg-green-100 text-green-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                          Return {order.returnStatus}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Cancel Order Button */}
                     {(order.status === 'Pending' || order.status === 'Processing') && (
@@ -153,7 +246,7 @@ const ProfilePage = () => {
                         <img src={item.images?.thumbnail || item.images?.primary} alt={item.title} className="w-full h-full object-contain mix-blend-multiply" />
                       </div>
                       <h3 className="font-bold text-[#0F1720] line-clamp-1 mb-1">{item.title}</h3>
-                      <p className="font-black text-[#0F1720]">${item.price}</p>
+                      <p className="font-black text-[#0F1720]">₹{item.price}</p>
                     </Link>
                     <button
                       onClick={async () => {
@@ -297,6 +390,15 @@ const ProfilePage = () => {
         message="Are you sure you want to cancel this order? This action cannot be undone."
         confirmText="Cancel Order"
         type="danger"
+      />
+      <Modal
+        isOpen={returnModal.isOpen}
+        onClose={() => setReturnModal({ isOpen: false, orderId: null })}
+        onConfirm={handleReturnRequest}
+        title="Request Return"
+        message="Are you sure you want to request a return for this order? Our team will review your request within 24 hours."
+        confirmText="Request Return"
+        type="primary"
       />
 
       <div className="container-custom py-12 lg:py-20 px-6 lg:px-20">

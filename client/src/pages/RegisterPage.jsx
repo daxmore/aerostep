@@ -38,7 +38,7 @@ const RegisterPage = () => {
       return false;
     }
 
-    const emailRegex = /^\S+@\S+\.\S+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
       return false;
@@ -52,7 +52,7 @@ const RegisterPage = () => {
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>?]/.test(password);
 
     if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
       setError('Password must contain uppercase, lowercase, number, and special character');
@@ -72,9 +72,9 @@ const RegisterPage = () => {
       await axios.post('http://localhost:5000/api/users/register', formData);
       // Redirect to login page after successful registration
       navigate('/login');
-    } catch (err) {
+    } catch (_err) {
       // Prefer backend message if provided (server sends `msg`), fall back to `message`.
-      const serverMsg = err.response?.data?.msg || err.response?.data?.message;
+      const serverMsg = _err.response?.data?.msg || _err.response?.data?.message;
       setError(serverMsg || 'Registration failed');
     }
   };

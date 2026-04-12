@@ -8,6 +8,10 @@ import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import WishlistPage from './pages/WishlistPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProductsPage from './pages/admin/ProductsPage';
@@ -16,6 +20,9 @@ import OrdersPage from './pages/admin/OrdersPage';
 import OrderDetailsPage from './pages/admin/OrderDetailsPage';
 import UsersPage from './pages/admin/UsersPage';
 import LowStockPage from './pages/admin/LowStockPage';
+import CouponsPage from './pages/admin/CouponsPage';
+import SalesPage from './pages/admin/SalesPage';
+import ReturnsPage from './pages/admin/ReturnsPage';
 import AdminLayout from './components/AdminLayout';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 
@@ -31,6 +38,10 @@ const Router = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/wishlist" element={<WishlistPage />} />
+      <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
 
       {/* Admin Login (Public) */}
       <Route path="/admin/login" element={<AdminLogin />} />
@@ -46,6 +57,9 @@ const Router = () => {
           <Route path="orders/:id" element={<OrderDetailsPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="low-stock" element={<LowStockPage />} />
+          <Route path="coupons" element={<CouponsPage />} />
+          <Route path="sales" element={<SalesPage />} />
+          <Route path="returns" element={<ReturnsPage />} />
         </Route>
       </Route>
     </Routes>

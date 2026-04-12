@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroStep QA Testing Report</title>
+    <style>
+        body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 1200px; margin: 0 auto; padding: 40px 20px; background-color: #f3f4f6; }
+        .header-box { background: #0F1720; color: white; padding: 40px; border-radius: 24px; margin-bottom: 40px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .header-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 30px; }
+        .meta-item { border-left: 4px solid #0057FF; padding-left: 20px; }
+        .meta-label { font-size: 0.75rem; text-transform: uppercase; color: #9ca3af; font-weight: 800; letter-spacing: 1.5px; }
+        .meta-value { font-size: 1.2rem; font-weight: 600; margin-top: 5px; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-top: 30px; }
+        th { background-color: #f9fafb; padding: 20px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #6b7280; font-weight: 800; border-bottom: 2px solid #f3f4f6; letter-spacing: 0.5px; }
+        td { padding: 20px; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; vertical-align: top; color: #374151; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f9fafb; }
+        
+        .tid { font-family: 'JetBrains Mono', monospace; font-weight: bold; color: #0057FF; background: #eff6ff; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-new { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; margin-left: 8px; }
+        
+        .steps-list { padding-left: 20px; margin: 0; }
+        .steps-list li { margin-bottom: 4px; }
+        .data-tag { font-family: monospace; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; border: 1px solid #e5e7eb; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header-box">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h1 style="margin:0; font-size: 2.5rem; font-weight: 900; letter-spacing: -1.5px;">AeroStep <span style="color:#0057FF">QA Intelligence</span></h1>
+            <div style="background: #0057FF; color: white; padding: 8px 16px; border-radius: 12px; font-weight: 900; font-size: 0.8rem;">V 2.1 STABLE</div>
+        </div>
+        <div class="header-grid">
+            <div class="meta-item">
+                <div class="meta-label">Project Name</div>
+                <div class="meta-value">AeroStep Premium E-Commerce</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Lead Engineer</div>
+                <div class="meta-value">Daksh</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Testing Date</div>
+                <div class="meta-value">23 May 2026</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Module Suite</div>
+                <div class="meta-value">End-to-End Business Logic</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Peer Review</div>
+                <div class="meta-value">Daksh & Harsh</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Review Status</div>
+                <div class="meta-value" style="color:#10b981">Approved</div>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="10%">TID</th>
+                <th width="20%">Scenario Description</th>
+                <th width="20%">Test Data / Context</th>
+                <th width="20%">Verification Title</th>
+                <th width="30%">Step-by-Step Execution</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="tid">SC_001</span></td>
+                <td>Administrative Order Lifecycle</td>
+                <td>Order <span class="data-tag">#A1B2C3D4</span></td>
+                <td>Cancellation Logic</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Locate order in Admin Dashboard</li>
+                        <li>Verify "Processing" status</li>
+                        <li>Execute "Cancel" action</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="tid">SC_002</span></td>
+                <td>Customer Feedback UX</td>
+                <td>Toast Message Object</td>
+                <td>Global Notification Sync</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Trigger Cart Add event</li>
+                        <li>Wait for Success animation</li>
+                        <li>Verify Top-Right anchoring</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="tid">SC_009</span></td>
+                <td>Account Security & Enforcement</td>
+                <td>Access-Token (Status: Banned)</td>
+                <td>Policy Guard Validation</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Ban user via Admin panel</li>
+                        <li>Attempt login with credentials</li>
+                        <li>Verify 401 response & redirect</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="tid">SC_013</span></td>
+                <td>Route Middleware Integrity</td>
+                <td>URL <span class="data-tag">/admin/*</span></td>
+                <td>Protected Route Shield</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Logout from all sessions</li>
+                        <li>Paste admin URL in browser</li>
+                        <li>Verify redirect to Admin Login</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="tid">SC_015</span></td>
+                <td>Product Discoverability</td>
+                <td>Query <span class="data-tag">"Jordan 1"</span></td>
+                <td>Live Elastic Search</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Focus Search input in Navbar</li>
+                        <li>Type partial product name</li>
+                        <li>Ensure results load under 200ms</li>
+                    </ul>
+                </td>
+            </tr>
+
+            <!-- HIGH-PRIORITY INTEGRATION TESTS -->
+            <tr style="background-color: #fafcfe;">
+                <td><span class="tid">SC_020</span><span class="badge badge-new">NEW</span></td>
+                <td>Payment Gateway Resilience</td>
+                <td><span class="data-tag">4242...</span> Test Card</td>
+                <td>Stripe Webhook Sync</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Input valid test card in Checkout</li>
+                        <li>Submit confirmCardPayment</li>
+                        <li>Verify Success redirect & DB order creation</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background-color: #fafcfe;">
+                <td><span class="tid">SC_021</span><span class="badge badge-new">NEW</span></td>
+                <td>Cross-Origin Resource Sharing</td>
+                <td>CORS <span class="data-tag">PATCH Mapping</span></td>
+                <td>Preflight Request Handle</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Access Return Request from Admin</li>
+                        <li>Perform PATCH update to status</li>
+                        <li>Verify browser dev-tools for no CORS block</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background-color: #fafcfe;">
+                <td><span class="tid">SC_022</span><span class="badge badge-new">NEW</span></td>
+                <td>Checkout Fault Tolerance</td>
+                <td><span class="data-tag">Null</span> Address Payload</td>
+                <td>Validation Error Handling</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Clear saved shipping addresses</li>
+                        <li>Attempt to "Place Order"</li>
+                        <li>Verify "Address required" error toast</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background-color: #fafcfe;">
+                <td><span class="tid">SC_023</span><span class="badge badge-new">NEW</span></td>
+                <td>Financial Localization</td>
+                <td>Currency <span class="data-tag">₹ (INR)</span></td>
+                <td>Consistent Brand Aesthetic</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>View Cart, Checkout, and Dashboard</li>
+                        <li>Verify Rupee symbol is used globaly</li>
+                        <li>Check Email receipt for ₹ consistency</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background-color: #fafcfe;">
+                <td><span class="tid">SC_024</span><span class="badge badge-new">NEW</span></td>
+                <td>Post-Purchase Workflow</td>
+                <td>Return Life-cycle</td>
+                <td>Admin Return Management</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Trigger "Request Return" as Customer</li>
+                        <li>Navigate to Admin -> Returns</li>
+                        <li>Execute Approve/Reject lifecycle</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background-color: #fafcfe;">
+                <td><span class="tid">SC_025</span><span class="badge badge-new">NEW</span></td>
+                <td>Transactional Communication</td>
+                <td>SMTP <span class="data-tag">Gmail Service</span></td>
+                <td>Automated Notification Node</td>
+                <td>
+                    <ul class="steps-list">
+                        <li>Complete a successful checkout</li>
+                        <li>Verify server terminal for ✅ log</li>
+                        <li>Verify user inbox for HTML receipt</li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 50px; font-size: 11px; color: #9ca3af; text-align: center; letter-spacing: 1px; font-weight: 700;">
+        QA INTELLIGENCE SYSTEM // AEROSTEP INTERNAL DOCUMENTATION // ENCRYPTED & LOGGED
+    </div>
+
+</body>
+</html>

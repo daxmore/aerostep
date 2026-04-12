@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Package, User, MapPin, CreditCard } from 'lucide-react';
+import { ArrowLeft, Package, User, MapPin, CreditCard, RotateCcw, Check, X } from 'lucide-react';
 
 const OrderDetailsPage = () => {
     const navigate = useNavigate();
@@ -55,6 +55,33 @@ const OrderDetailsPage = () => {
         setUpdating(false);
     };
 
+    const handleReturnStatusUpdate = async (newReturnStatus) => {
+        if (!confirm(`Are you sure you want to ${newReturnStatus.toLowerCase()} this return request?`)) return;
+
+        setUpdating(true);
+        try {
+            const response = await fetch(`http://localhost:5000/api/admin/orders/${id}/return-status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ status: newReturnStatus }),
+            });
+
+            if (response.ok) {
+                const updatedOrder = await response.json();
+                setOrder(updatedOrder);
+                alert(`Return request ${newReturnStatus.toLowerCase()} successfully`);
+            } else {
+                const data = await response.json();
+                alert(data.msg || 'Failed to update return status');
+            }
+        } catch (error) {
+            console.error('Error updating return status:', error);
+            alert('Error updating return request');
+        }
+        setUpdating(false);
+    };
+
     const getStatusColor = (status) => {
         const colors = {
             'Pending': 'bg-yellow-50 text-yellow-700 border-yellow-200',
@@ -96,15 +123,34 @@ const OrderDetailsPage = () => {
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-bold text-aero-text font-heading">Order #{order._id.slice(-8)}</h1>
+                        <h1 className="text-3xl font-bold text-aero-text font-heading">Order #{order._id.slice(-8).toUpperCase()}</h1>
                         <p className="text-gray-500">
                             Placed on {new Date(order.createdAt).toLocaleString()}
                         </p>
                     </div>
                 </div>
 
-                {/* Status Update Dropdown */}
+                {/* Status Update Dropdown & Invoice */}
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={async () => {
+                            try {
+                                const response = await fetch(`http://localhost:5000/api/orders/${order._id}/invoice`, {
+                                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                                });
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `AeroStep-Invoice-${order._id.slice(-6)}.pdf`;
+                                a.click();
+                            } catch (_err) { alert('Download failed'); }
+                        }}
+                        className="px-4 py-2 border border-blue-200 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 font-bold text-sm"
+                    >
+                        <CreditCard className="w-4 h-4" />
+                        Download Invoice
+                    </button>
                     <span className="text-gray-500">Status:</span>
                     <select
                         value={order.status}
@@ -121,8 +167,55 @@ const OrderDetailsPage = () => {
                     <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${getStatusColor(order.status)}`}>
                         {order.status}
                     </span>
+                    {order.returnStatus !== 'None' && (
+                        <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${
+                            order.returnStatus === 'Requested' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                            order.returnStatus === 'Approved' ? 'bg-green-50 text-green-700 border-green-200' :
+                            'bg-red-50 text-red-700 border-red-200'
+                        }`}>
+                            Return: {order.returnStatus}
+                        </span>
+                    )}
                 </div>
             </div>
+
+            {/* Return Request Banner */}
+            {order.returnStatus === 'Requested' && (
+                <div className="mb-8 p-6 bg-orange-50 border border-orange-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-orange-100 rounded-xl">
+                            <RotateCcw className="w-6 h-6 text-orange-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-orange-800 font-heading">Return Requested</h3>
+                            <p className="text-orange-700 mt-1">
+                                {order.returnReason ? `Reason: "${order.returnReason}"` : 'No reason provided.'}
+                            </p>
+                            <p className="text-xs text-orange-600 mt-2 font-medium">
+                                Requested on {new Date(order.returnRequestedAt).toLocaleString()}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => handleReturnStatusUpdate('Rejected')}
+                            disabled={updating}
+                            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 transition-all shadow-sm"
+                        >
+                            <X className="w-4 h-4" />
+                            Reject
+                        </button>
+                        <button
+                            onClick={() => handleReturnStatusUpdate('Approved')}
+                            disabled={updating}
+                            className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-md"
+                        >
+                            <Check className="w-4 h-4" />
+                            Approve Return
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Order Items */}

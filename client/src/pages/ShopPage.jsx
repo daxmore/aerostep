@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
+import Skeleton from '../components/Skeleton';
 import { SlidersHorizontal } from 'lucide-react';
 
 const ShopPage = () => {
@@ -12,6 +13,10 @@ const ShopPage = () => {
     category: searchParams.get('category') || '',
     tag: searchParams.get('tag') || '',
     sort: searchParams.get('sort') || '',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    size: searchParams.get('size') || '',
+    search: searchParams.get('q') || '',
   });
 
   useEffect(() => {
@@ -19,6 +24,10 @@ const ShopPage = () => {
       category: searchParams.get('category') || '',
       tag: searchParams.get('tag') || '',
       sort: searchParams.get('sort') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      size: searchParams.get('size') || '',
+      search: searchParams.get('q') || '',
     });
   }, [searchParams]);
 
@@ -29,6 +38,10 @@ const ShopPage = () => {
       if (filters.category) params.append('category', filters.category);
       if (filters.tag) params.append('tags', filters.tag);
       if (filters.sort) params.append('sort', filters.sort);
+      if (filters.minPrice) params.append('minPrice', filters.minPrice);
+      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+      if (filters.size) params.append('size', filters.size);
+      if (filters.search) params.append('search', filters.search);
 
       const response = await axios.get(`http://localhost:5000/api/products?${params.toString()}`);
       setProducts(response.data);
@@ -56,7 +69,7 @@ const ShopPage = () => {
   };
 
   const clearFilters = () => {
-    setFilters({ category: '', tag: '', sort: '' });
+    setFilters({ category: '', tag: '', sort: '', minPrice: '', maxPrice: '', size: '', search: '' });
     setSearchParams({});
   };
 
@@ -128,7 +141,7 @@ const ShopPage = () => {
               </div>
 
               {/* Tag Filter */}
-              <div>
+              <div className="mb-10">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Collections</h3>
                 <div className="space-y-3">
                   {['New Arrival', 'Best Seller', 'Limited Edition'].map((tag) => (
@@ -145,17 +158,81 @@ const ShopPage = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Price Filter */}
+              <div className="mb-10">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Price Range</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <input 
+                        type="number" 
+                        placeholder="Min" 
+                        value={filters.minPrice}
+                        onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                        className="w-full bg-gray-50 border-none rounded-lg px-3 py-2 text-sm font-bold focus:ring-1 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-400">-</span>
+                    <input 
+                        type="number" 
+                        placeholder="Max" 
+                        value={filters.maxPrice}
+                        onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                        className="w-full bg-gray-50 border-none rounded-lg px-3 py-2 text-sm font-bold focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {[
+                        { label: 'Under ₹5k', min: '0', max: '5000' },
+                        { label: '₹5k - ₹10k', min: '5000', max: '10000' }
+                    ].map((range) => (
+                        <button
+                            key={range.label}
+                            onClick={() => {
+                                handleFilterChange('minPrice', range.min);
+                                handleFilterChange('maxPrice', range.max);
+                            }}
+                            className="bg-gray-100 px-3 py-1.5 rounded-full text-[10px] font-bold text-gray-500 hover:bg-gray-200 transition-colors"
+                        >
+                            {range.label}
+                        </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Size Filter */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Size (UK)</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {[6, 7, 8, 9, 10, 11, 12].map((sz) => (
+                    <button
+                      key={sz}
+                      onClick={() => handleFilterChange('size', filters.size == sz ? '' : sz)}
+                      className={`h-10 rounded-lg text-sm font-bold border-2 transition-all ${filters.size == sz
+                        ? 'bg-[#0F1720] text-white border-[#0F1720]'
+                        : 'bg-white text-gray-500 border-gray-100 hover:border-gray-300'
+                        }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Products Grid */}
           <div className="lg:col-span-9">
             {loading ? (
-              <div className="flex justify-center items-center h-96">
-                <div className="animate-pulse flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 border-4 border-gray-200 border-t-[#0F1720] rounded-full animate-spin"></div>
-                  <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Loading Gear...</div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="space-y-4">
+                    <Skeleton className="aspect-[4/5] w-full rounded-2xl" />
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-6 w-1/2" />
+                  </div>
+                ))}
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-32 bg-gray-50 rounded-3xl">

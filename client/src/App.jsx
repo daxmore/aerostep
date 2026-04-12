@@ -4,6 +4,7 @@ import Router from './Router';
 import AeroStepNavbar from './components/AeroStepNavbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import SaleBanner from './components/SaleBanner';
 
 function App() {
   const location = useLocation();
@@ -12,7 +13,12 @@ function App() {
   return (
     <div>
       <ScrollToTop />
-      {!isAdminRoute && <AeroStepNavbar />}
+      {!isAdminRoute && (
+        <>
+          <SaleBanner />
+          <AeroStepNavbar />
+        </>
+      )}
       <Router />
       {!isAdminRoute && <Footer />}
     </div>

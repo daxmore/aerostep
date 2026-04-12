@@ -34,6 +34,12 @@ const ProductDetailPage = () => {
         if (response.data.images?.primary) {
           setSelectedImage(0);
         }
+
+        // Add to Recently Viewed
+        const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+        const updatedRecent = [id, ...recentlyViewed.filter(item => item !== id)].slice(0, 10);
+        localStorage.setItem('recentlyViewed', JSON.stringify(updatedRecent));
+
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
@@ -235,8 +241,24 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Price */}
-            <div className="text-5xl font-bold text-[#111]">
-              ₹{product.price?.toLocaleString('en-IN')}
+            <div className="flex flex-col">
+              {product.salePrice ? (
+                <div className="flex items-end gap-4">
+                  <div className="text-5xl font-bold text-[#FF3131]">
+                    ₹{product.salePrice.toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-2xl text-gray-400 font-bold line-through mb-1">
+                    ₹{product.price?.toLocaleString('en-IN')}
+                  </div>
+                  <div className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-2">
+                    Save ₹{(product.price - product.salePrice).toLocaleString()}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-5xl font-bold text-[#111]">
+                  ₹{product.price?.toLocaleString('en-IN')}
+                </div>
+              )}
             </div>
 
             {/* Description */}

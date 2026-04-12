@@ -4,6 +4,9 @@ const adminAuth = require('../middleware/adminAuth');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const Cart = require('../models/Cart');
+const Sale = require('../models/Sale');
+const { sendReturnStatusUpdate, sendAbandonedCartEmail } = require('../utils/email');
 
 // ==================== DASHBOARD ====================
 
@@ -179,11 +182,36 @@ router.delete('/products/:id', adminAuth, async (req, res) => {
 // @access  Admin
 router.get('/orders', adminAuth, async (req, res) => {
     try {
-        const { status } = req.query;
+        const { status, search } = req.query;
 
         let filter = {};
         if (status && status !== 'All') {
             filter.status = status;
+        }
+
+        // Search by short ID (last 8 characters)
+        if (search) {
+            const cleanSearch = search.trim();
+            // If it starts with #, strip it
+            const searchTerm = cleanSearch.startsWith('#') ? cleanSearch.substring(1) : cleanSearch;
+            
+            if (searchTerm.length === 8) {
+                // MongoDB doesn't allow regex on ObjectIds directly in find, 
+                // so we use $expr to convert _id to string and check the suffix.
+                filter.$expr = {
+                    $eq: [
+                        { $substr: [{ $toString: "$_id" }, { $subtract: [{ $strLenCP: { $toString: "$_id" } }, 8] }, 8] },
+                        searchTerm.toLowerCase()
+                    ]
+                };
+            } else if (searchTerm.length > 8) {
+              // Try searching by full ID if provided
+              try {
+                if (/^[0-9a-fA-F]{24}$/.test(searchTerm)) {
+                  filter._id = searchTerm;
+                }
+              } catch (_e) { /* ignore invalid ObjectID */ }
+            }
         }
 
         const orders = await Order.find(filter)
@@ -246,6 +274,11 @@ router.put('/orders/:id/status', adminAuth, async (req, res) => {
         }
 
         order.status = status;
+        
+        if (status === 'Delivered') {
+            order.deliveredAt = new Date();
+        }
+
         await order.save();
 
         res.json(order);
@@ -407,6 +440,144 @@ router.delete('/users/:id', adminAuth, async (req, res) => {
             return res.status(404).json({ msg: 'User not found' });
         }
         res.status(500).json({ msg: 'Server error', error: err.message });
+    }
+});
+
+// ==================== SALES ====================
+
+// @route   GET api/admin/sales
+// @desc    Get all sales
+// @access  Admin
+router.get('/sales', adminAuth, async (req, res) => {
+    try {
+        const sales = await Sale.find().sort({ createdAt: -1 });
+        res.json(sales);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/admin/sales
+// @desc    Create a new sale
+// @access  Admin
+router.post('/sales', adminAuth, async (req, res) => {
+    const { name, discountPercentage, category, startDate, endDate, isActive } = req.body;
+    try {
+        const sale = new Sale({ name, discountPercentage, category, startDate, endDate, isActive });
+        await sale.save();
+        res.json(sale);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   DELETE api/admin/sales/:id
+// @desc    Delete a sale
+// @access  Admin
+router.delete('/sales/:id', adminAuth, async (req, res) => {
+    try {
+        await Sale.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'Sale deleted' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PATCH api/admin/orders/:id/return-status
+// @desc    Approve or reject a return request
+// @access  Admin
+router.patch('/orders/:id/return-status', adminAuth, async (req, res) => {
+    const { status } = req.body;
+    const validStatuses = ['Approved', 'Rejected'];
+
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ msg: 'Invalid return status' });
+    }
+
+    try {
+        const order = await Order.findById(req.params.id).populate('userId', 'name email');
+
+        if (!order) {
+            return res.status(404).json({ msg: 'Order not found' });
+        }
+
+        if (order.returnStatus !== 'Requested') {
+            return res.status(400).json({ msg: 'No pending return request for this order' });
+        }
+
+        order.returnStatus = status;
+        if (status === 'Approved') {
+            order.status = 'Returned';
+            // Optional: Restore stock when return is approved
+            for (const item of order.products) {
+                await Product.updateOne(
+                    { _id: item.productId, "sizes.size": item.size },
+                    { $inc: { "sizes.$.stock": item.quantity } }
+                );
+            }
+        }
+        
+        await order.save();
+
+        // Send notification email
+        sendReturnStatusUpdate(order, order.userId, status);
+
+        res.json(order);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/admin/trigger-abandoned-emails
+// @desc    Send reminder emails for carts abandoned for > 24 hours
+// @access  Admin
+router.post('/trigger-abandoned-emails', adminAuth, async (req, res) => {
+    try {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+        // Find carts updated between 24 and 48 hours ago
+        const abandonedCarts = await Cart.find({
+            updatedAt: { $gte: fortyEightHoursAgo, $lte: twentyFourHoursAgo }
+        }).populate('userId', 'name email').populate('productId');
+
+        // Group by user (if multiple products in cart)
+        const userCarts = {};
+        abandonedCarts.forEach(item => {
+            if (!item.userId) return;
+            const userId = item.userId._id.toString();
+            if (!userCarts[userId]) {
+                userCarts[userId] = {
+                    user: item.userId,
+                    items: []
+                };
+            }
+            userCarts[userId].items.push(item);
+        });
+
+        let emailsSent = 0;
+        for (const userId in userCarts) {
+            const data = userCarts[userId];
+            // Check if user has already placed an order after the cart was updated
+            const recentOrder = await Order.findOne({
+                userId: userId,
+                createdAt: { $gt: twentyFourHoursAgo }
+            });
+
+            if (!recentOrder) {
+                await sendAbandonedCartEmail(data.user, data.items);
+                emailsSent++;
+            }
+        }
+
+        res.json({ msg: `Successfully triggered ${emailsSent} abandoned cart recovery emails` });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
     }
 });
 

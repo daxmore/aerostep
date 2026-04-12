@@ -7,19 +7,24 @@ const OrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('All');
+    const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     useEffect(() => {
         fetchOrders();
         // eslint-disable-next-line
-    }, [filterStatus]);
+    }, [filterStatus, searchTerm]);
 
     const fetchOrders = async () => {
         try {
-            const url = filterStatus === 'All'
-                ? 'http://localhost:5000/api/admin/orders'
-                : `http://localhost:5000/api/admin/orders?status=${filterStatus}`;
+            let url = 'http://localhost:5000/api/admin/orders?';
+            const params = new URLSearchParams();
+            
+            if (filterStatus !== 'All') params.append('status', filterStatus);
+            if (searchTerm) params.append('search', searchTerm);
+            
+            url += params.toString();
 
             const response = await fetch(url, {
                 credentials: 'include',
@@ -61,12 +66,27 @@ const OrdersPage = () => {
     return (
         <div className="space-y-6 font-body">
             {/* Header with Filter */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-aero-text mb-2 font-heading">Orders</h1>
                     <p className="text-gray-500">Manage customer orders ({orders.length} total)</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative flex-1 min-w-[200px]">
+                        <input
+                            type="text"
+                            placeholder="Search Order ID (#...)"
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full px-4 py-2 pl-10 bg-aero-surface border border-gray-200 rounded-lg text-aero-text focus:outline-none focus:ring-2 focus:ring-aero-primary transition-all shadow-sm"
+                        />
+                        <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
                     <select
                         value={itemsPerPage}
                         onChange={(e) => {
@@ -118,8 +138,8 @@ const OrdersPage = () => {
                             {currentOrders.length > 0 ? (
                                 currentOrders.map((order) => (
                                     <tr key={order._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                                            #{order._id.slice(-6)}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono font-bold">
+                                            #{order._id.slice(-8).toUpperCase()}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex flex-col">
@@ -134,9 +154,20 @@ const OrdersPage = () => {
                                             ₹{order.totalPrice.toLocaleString()}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(order.status)}`}>
-                                                {order.status}
-                                            </span>
+                                            <div className="flex flex-col gap-1">
+                                                <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold w-fit ${getStatusColor(order.status)}`}>
+                                                    {order.status}
+                                                </span>
+                                                {order.returnStatus && order.returnStatus !== 'None' && (
+                                                    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider w-fit ${
+                                                        order.returnStatus === 'Requested' ? 'bg-orange-100 text-orange-700' :
+                                                        order.returnStatus === 'Approved' ? 'bg-green-100 text-green-700' :
+                                                        'bg-red-100 text-red-700'
+                                                    }`}>
+                                                        Return {order.returnStatus}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button

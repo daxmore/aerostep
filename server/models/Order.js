@@ -35,9 +35,39 @@ const orderSchema = new mongoose.Schema({
     type: String,
     default: 'Demo Payment',
   },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Completed', 'Failed'],
+    default: 'Pending',
+  },
+  transactionId: {
+    type: String,
+  },
+  discountAmount: {
+    type: Number,
+    default: 0,
+  },
+  couponCode: {
+    type: String,
+  },
   status: {
     type: String,
+    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
     default: 'Pending',
+  },
+  returnStatus: {
+    type: String,
+    enum: ['None', 'Requested', 'Approved', 'Rejected'],
+    default: 'None',
+  },
+  returnRequestedAt: {
+    type: Date,
+  },
+  deliveredAt: {
+    type: Date,
+  },
+  returnReason: {
+    type: String,
   },
 }, { timestamps: true });
 

@@ -8,7 +8,10 @@ import {
     LogOut,
     Menu,
     X,
-    PackageX
+    PackageX,
+    Ticket,
+    Percent,
+    RotateCcw
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -39,6 +42,9 @@ const AdminLayout = () => {
         { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
         { path: '/admin/users', icon: Users, label: 'Users' },
         { path: '/admin/low-stock', icon: PackageX, label: 'Low Stock' },
+        { path: '/admin/coupons', icon: Ticket, label: 'Coupons' },
+        { path: '/admin/sales', icon: Percent, label: 'Festival Sales' },
+        { path: '/admin/returns', icon: RotateCcw, label: 'Returns' },
     ];
 
     return (
@@ -75,7 +81,8 @@ const AdminLayout = () => {
                     }`}
             >
                 <nav className="p-4 space-y-2">
-                    {navItems.map(({ path, icon: Icon, label }) => {
+                    {navItems.map((item) => {
+                        const { path, icon: ItemIcon, label } = item;
                         const isActive = location.pathname === path;
                         return (
                             <Link
@@ -86,7 +93,7 @@ const AdminLayout = () => {
                                     : 'text-gray-500 hover:bg-gray-50 hover:text-aero-primary'
                                     }`}
                             >
-                                <Icon className="w-5 h-5" />
+                                <ItemIcon className="w-5 h-5" />
                                 <span className="font-medium">{label}</span>
                             </Link>
                         );

@@ -5,6 +5,7 @@ import NewArrivals from '../components/NewArrivals';
 import FeaturedCollection from '../components/FeaturedCollection';
 import BrandMessage from '../components/BrandMessage';
 import SubscribeStrip from '../components/SubscribeStrip';
+import RecentlyViewed from '../components/RecentlyViewed';
 
 const HomePage = () => {
   return (
@@ -17,6 +18,7 @@ const HomePage = () => {
         <FeaturedCollection />
         <BrandMessage />
         <SubscribeStrip />
+        <RecentlyViewed />
       </main>
     </>
   );

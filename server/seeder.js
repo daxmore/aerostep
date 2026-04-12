@@ -60,25 +60,6 @@ const regularUsers = [
       },
     ],
   },
-  {
-    name: 'ankit',
-    email: 'ankit@example.com',
-    password: 'ankit@123',
-    phone: '9876543211',
-    profileImage: 'https://i.pravatar.cc/150?img=33',
-    isAdmin: false,
-    addresses: [
-      {
-        fullName: 'ankit',
-        phone: '9876543211',
-        street: '789 Connaught Place',
-        city: 'Delhi',
-        state: 'Delhi',
-        zipCode: '110001',
-        isDefault: true,
-      },
-    ],
-  },
 ];
 
 // Combine all users
@@ -356,7 +337,12 @@ const importData = async () => {
     await Review.deleteMany();
 
     console.log('👥 Importing users...');
-    const createdUsers = await User.insertMany(users);
+    const createdUsers = [];
+    for (const user of users) {
+      const newUser = new User(user);
+      await newUser.save();
+      createdUsers.push(newUser);
+    }
     console.log('✅ Users imported!');
 
     console.log('👟 Importing products...');
